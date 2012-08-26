@@ -1,0 +1,30 @@
+{
+    "welcome": "Welcome to Yann's NodeJS server!",
+    "name": "FirstGameServer",
+    "mode": "debug",
+    "errorPath": "Error/",
+    "debug": 
+    {
+        "port": 8000,
+        "publicDirectory": "Client",
+        "cacheTimer": 0
+    },
+    "production": 
+    {
+        "port": 8001,
+        "publicDirectory": "Client",
+        "cacheTimer": 3600
+    },
+    "routes": 
+    {
+        "defaultRoute":
+        {
+            "pattern": "{controller}/{action}",
+            "defaultValue":
+            {
+                "controller": "Accueil",
+                "action": "Index"
+            }
+        }
+    }
+}
