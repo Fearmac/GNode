@@ -9,7 +9,7 @@ module.exports = Accueil = Controller.extend({
     },
     /*[ACL("Guest")]*/
     /*[ACL("Guest")]*/
-    Index: function(/*[ACL("Guest")]*/ prout, /*[ACL("Guest")]*/ plop)
+    Index: function()
     {
         console.log(JSON.stringify(this.$_GET));
         return "<link href=\"/Resources/css/style.css\" rel=\"stylesheet\" type=\"text/css\" /><span id=\"test\">Accueil</span>";
