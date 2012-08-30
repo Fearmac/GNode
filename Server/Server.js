@@ -62,7 +62,6 @@ module.exports = Server = cls.Class.extend({
                 res.writeHead(500);
                 res.end('Internal Server Error');
             }
-
         }).listen(self.Port());
 
     }    

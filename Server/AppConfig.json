@@ -17,13 +17,22 @@
     },
     "routes": 
     {
-        "defaultRoute":
+        "plop":
         {
-            "pattern": "{controller}/{action}",
+            "pattern": "{Controllers}/{View}/{BonhommeEnMousse}/{Action}/{ids}",
             "defaultValue":
             {
-                "controller": "Accueil",
-                "action": "Index"
+                "Controllers": "Accueil",
+                "Action": "Index"
+            }
+        },
+        "defaultRoute":
+        {
+            "pattern": "{Controllers}/{Action}",
+            "defaultValue":
+            {
+                "Controllers": "Accueil",
+                "Action": "Index"
             }
         }
     }
