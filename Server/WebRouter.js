@@ -254,6 +254,7 @@ module.exports = WebRouter = cls.Class.extend({
             });
             //TODO
             // i need to check current user rank and compare it to the called function and then return true or false
+            // i must not forget to change the above admin string to get the default rank from DB
             if(_.isUndefined(acl)) acl = new Attr("Admin");
             console.log(acl);
             callBack(acl.GetRank() == "Admin");
