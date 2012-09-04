@@ -4,9 +4,9 @@ var fs = require('fs');
 var url = require('url');
 var util = require('util');
 var ConsoleColors = require('../Common/ConsoleColors');
-var Helpers = require('../Common/Helpers');
 var StringHelpers = require('../Common/StringHelpers');
 var UrlContext = require('../Common/UrlContext.js');
+var AttributeReader = require('./Attribute/AttributeReader.js');
     
 module.exports = WebRouter = cls.Class.extend({    
     init: function(config)
@@ -47,11 +47,10 @@ module.exports = WebRouter = cls.Class.extend({
         var routes = self.configServer.routes;
         var defaultRoute = routes.defaultRoute.defaultValue;
         var publicDirectory = '../' + self.configServer[self.configServer["mode"]].publicDirectory;
+        //If current url is the website root
         if (req.url == "/"){
-            //Si l'adresse fournie est l'adresse root du site
             var defaultFile = publicDirectory + '/Controllers/' + defaultRoute.Controllers + '/' + defaultRoute.Controllers + '.js';
 
-            console.log("defaultFile to render: " + defaultFile);
             fs.exists(defaultFile, function (exists) {
                 if (!exists)
                 {
@@ -60,25 +59,30 @@ module.exports = WebRouter = cls.Class.extend({
                 else 
                 {
                     var Controller = require(defaultFile);
-                    var ctr = new Controller();
-                    self.CheckACL(ctr);
-                    try
-                    {
-                        self.RenderHtml(res, ctr[defaultRoute.Action]());
-                    }
-                    catch(err)
-                    {
-                        self.RenderHtml(res, ctr.Display(defaultRoute.Action + ' is not a know action from ' + defaultRoute.controller + ' please check your route "defaultRoute" action configuration'));
-                    }
+                    var ctr = new Controller(new UrlContext());
+                    self.CheckACL(defaultFile, defaultRoute.Action, function(allowed){
+                        if(!allowed)
+                            self.RenderHtml(res, ctr.Display("You are not allowed to be there"));
+                        else
+                        {
+                            try
+                            {
+                                self.RenderHtml(res, ctr[defaultRoute.Action]());
+                            }
+                            catch(err)
+                            {
+                                self.RenderHtml(res, ctr.Display(defaultRoute.Action + ' is not a know action from ' + defaultRoute.controller + ' please check your route "defaultRoute" action configuration'));
+                            }
+                        }
+                    });
                 }
             }); 
         }
+        //If current url isn't the website root we have to choose the right route
         else if(req.url != "/" && strH.EndsWith(url.parse(req.url).pathname, '.html'))
         {
-            //si l'adresse fournie n'est pas l'adresse root, il faut déterminer la bonne route à suivre
             var urlWithoutRoot = req.url.substr(1,req.url.length);
-            //verifie si l'url se termine par html TODO
-            //
+            //verifie si l'url se termine par html
             var urlModelParamsPattern = "{([a-zA-Z0-9]+)}";
             var urlModelParamsRegex = new RegExp(urlModelParamsPattern, 'g');
 
@@ -152,21 +156,37 @@ module.exports = WebRouter = cls.Class.extend({
                 }
             }
             fileToRender += ".js";
-            var Controller = require(fileToRender);
-            var ctr = new Controller(urlContext);
-            self.CheckACL(ctr);
-            try
-            {
-                self.RenderHtml(res, ctr[action]());
-            }
-            catch(err)
-            {
-                self.ServerError(res, 404, '404 Bad Request for ' + urlWithoutRoot);
-            }
+            fs.exists(fileToRender, function (exists) {
+                if(exists)
+                {
+                    var Controller = require(fileToRender);
+                    var ctr = new Controller(urlContext);
+                    self.CheckACL(fileToRender, action, function(allowed){
+                        if(!allowed)
+                            self.RenderHtml(res, ctr.Display("You are not allowed to be there"));
+                        else
+                        {
+                            try
+                            {
+                                self.RenderHtml(res, ctr[action]());
+                            }
+                            catch(err)
+                            {
+
+                                self.RenderHtml(res, ctr.Display(action + ' is not a know action please check your controller action configuration'));
+                            }
+                        }
+                    });
+                }
+                else
+                {
+                    self.ServerError(res, 404, '404 Bad Request for ' + urlWithoutRoot);
+                }
+            });
         }
+        //if it's a static file (css, img...)
         else
         {
-            //si le fichier recherché est un  fichier static (type css, js, autre...)
             fs.readFile(publicDirectory + url.parse(req.url).pathname, function(error, content) {
                 if (error) {
                     self.ServerError(res, 404, '404 Bad Request for ' + urlWithoutRoot);
@@ -177,7 +197,7 @@ module.exports = WebRouter = cls.Class.extend({
                 }
             });
         }
-        //Test spécifique à la favicon du site
+        //To get favicon
         if (req.url === '/favicon.ico') {
             fs.readFile(publicDirectory + '/favicon.ico', function(error, content) {
                 if (error) {
@@ -189,12 +209,55 @@ module.exports = WebRouter = cls.Class.extend({
             });
         }
     },
-    CheckACL: function(classType)
+    CheckACL: function(fileClass, action, callBack)
     {
-        var helpers = new Helpers();
-        helpers.Reflect(classType);
-        //console.log(helpers.GetArgsMeta());
-        //console.log(helpers.GetFuncMeta());
+        var attributeReader = new AttributeReader();
+        console.log(fileClass);
+        fs.readFile(fileClass, 'utf-8', function (err, data) {
+            var Attr = require("./Attribute/ACLAttribute.js");
+            var regex = /\/\*\[(ACL)\((.+)\)\]\*\//g;
+            var lines = data.toString().split("\n");
+            var acl;
+            _.each(lines, function(value, key, lines){
+                value = value.toString().replace(/(\r\n|\n|\r)/gm,"");
+                // test if the value is an attribute
+                if(value.match(regex))
+                {
+                    var val = regex.exec(value);
+                    // after regex execution, test if the value array isn't null
+                    if(!_.isNull(val))
+                    {
+                        //now we need to get the function related to the attribute
+                        var index = key;
+                        var functionDefined = null;
+                        var functionFinder = /([A-Z]{1}[a-zA-Z0-9]+): function\(/g;
+                        //while we can't match any function we iterate and then we'll have the line index of the function
+                        while(!lines[index].match(functionFinder))index++;
+                        if(!_.isNull(lines[index]))
+                        {
+                            //we can get the function with the above method:
+                            var currentFunction = functionFinder.exec(lines[index])[1];
+
+                            //we need to test if the action match the function
+                            if(currentFunction == action)
+                            {
+                                var param;
+                                if(!_.isNull(val[2]))
+                                {
+                                    param = val[2];
+                                }
+                                acl = new Attr(param);
+                            }
+                        }
+                    }
+                }
+            });
+            //TODO
+            // i need to check current user rank and compare it to the called function and then return true or false
+            if(_.isUndefined(acl)) acl = new Attr("Admin");
+            console.log(acl);
+            callBack(acl.GetRank() == "Admin");
+        });
     },
     getHeadersByFileExtension : function(extension) {
         var self = this;

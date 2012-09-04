@@ -48,7 +48,7 @@ module.exports = Server = cls.Class.extend({
         var WebRouter = require('./WebRouter');
         var router = new WebRouter(this.configServer);
         
-        http.createServer(function (req, res) 
+        http.createServer(function (req, res)
         {
             //wrap calls in a try catch
             //or the node js server will crash upon any code errors

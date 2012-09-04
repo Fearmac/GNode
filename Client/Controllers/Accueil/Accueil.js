@@ -2,16 +2,20 @@ var Controller = require('../../../Common/ControllerBase');
 var _ = require('underscore');
     
 module.exports = Accueil = Controller.extend({
-    /*[ACL("Guest")]*/
     init: function(urlContext)
     {
         this._super(urlContext);
     },
     /*[ACL("Guest")]*/
-    /*[ACL("Guest")]*/
     Index: function()
     {
-        console.log(JSON.stringify(this.$_GET));
+        var get = this.$_GET;
+        return "<link href=\"/Resources/css/style.css\" rel=\"stylesheet\" type=\"text/css\" /><span id=\"test\">Accueil</span>";
+    },
+    /*[ACL("Admin")]*/
+    Plop: function()
+    {
+        var get = this.$_GET;
         return "<link href=\"/Resources/css/style.css\" rel=\"stylesheet\" type=\"text/css\" /><span id=\"test\">Accueil</span>";
     }
 });
