@@ -2,7 +2,6 @@ var cls = require('../Common/class');
 var _ = require('underscore');
 var fs = require('fs');
 var url = require('url');
-var util = require('util');
 var ConsoleColors = require('../Common/ConsoleColors');
 var StringHelpers = require('../Common/StringHelpers');
 var UrlContext = require('../Common/UrlContext.js');
@@ -13,12 +12,6 @@ module.exports = WebRouter = cls.Class.extend({
     {
         this.consoleColors = new ConsoleColors();
         this.configServer = config;
-        this.actions = {
-            'view' : function(user) 
-            {
-                return '<h1>Todos for ' + user + '</h1>';
-            }
-        }
     },
     RenderHtml: function(res, content) 
     {
@@ -252,11 +245,9 @@ module.exports = WebRouter = cls.Class.extend({
                     }
                 }
             });
-            //TODO
-            // i need to check current user rank and compare it to the called function and then return true or false
+            //TODO i need to check current user rank and compare it to the called function and then return true or false
             // i must not forget to change the above admin string to get the default rank from DB
             if(_.isUndefined(acl)) acl = new Attr("Admin");
-            console.log(acl);
             callBack(acl.GetRank() == "Admin");
         });
     },
@@ -268,11 +259,140 @@ module.exports = WebRouter = cls.Class.extend({
             case 'css':
                 headers['Content-Type'] = 'text/css';
                 break;
+            case 'csv':
+                headers['Content-Type'] = 'text/csv';
+                break;
+            case 'html':
+                headers['Content-Type'] = 'text/html';
+                break;
+            case 'txt':
+                headers['Content-Type'] = 'text/plain';
+                break;
+            case 'xml':
+                headers['Content-Type'] = 'text/xml';
+                break;
+            case 'mpeg':
+                headers['Content-Type'] = 'video/mpeg';
+                break;
+            case 'mpg':
+                headers['Content-Type'] = 'video/mpeg';
+                break;
+            case 'mp4':
+                headers['Content-Type'] = 'video/mp4';
+                break;
+            case 'mov':
+                headers['Content-Type'] = 'video/quicktime';
+                break;
+            case 'wmv':
+                headers['Content-Type'] = 'video/x-ms-wmv';
+                break;
+            case 'p12':
+                headers['Content-Type'] = 'application/x-pkcs12';
+                break;
+            case 'pfx':
+                headers['Content-Type'] = 'application/x-pkcs12';
+                break;
+            case 'p7b':
+                headers['Content-Type'] = 'application/x-pkcs7-certificates';
+                break;
+            case 'spc':
+                headers['Content-Type'] = 'application/x-pkcs7-certificates';
+                break;
+            case 'p7r':
+                headers['Content-Type'] = 'application/x-pkcs7-certreqresp';
+                break;
+            case 'p7c':
+                headers['Content-Type'] = 'application/x-pkcs7-mime';
+                break;
+            case 'p7m':
+                headers['Content-Type'] = 'application/x-pkcs7-mime';
+                break;
+            case 'p7s':
+                headers['Content-Type'] = 'application/x-pkcs7-signature';
+                break;
             case 'js':
                 headers['Content-Type'] = 'application/javascript';
                 break;
+            case 'ogg':
+                headers['Content-Type'] = 'application/ogg';
+                break;
+            case 'pdf':
+                headers['Content-Type'] = 'application/pdf';
+                break;
+            case 'xhtml':
+                headers['Content-Type'] = 'application/xhtml+xml';
+                break;
+            case 'dtd':
+                headers['Content-Type'] = 'application/xml-dtd';
+                break;
+            case 'json':
+                headers['Content-Type'] = 'application/json';
+                break;
+            case 'zip':
+                headers['Content-Type'] = 'application/zip';
+                break;
+            case 'gif':
+                headers['Content-Type'] = 'image/gif';
+                break;
+            case 'jpeg':
+                headers['Content-Type'] = 'image/jpeg';
+                break;
+            case 'jpg':
+                headers['Content-Type'] = 'image/jpeg';
+                break;
+            case 'png':
+                headers['Content-Type'] = 'image/png';
+                break;
+            case 'svg':
+                headers['Content-Type'] = 'image/svg+xml';
+                break;
+            case 'tiff':
+                headers['Content-Type'] = 'image/tiff';
+                break;
             case 'ico':
-                headers['Content-Type'] = 'image/x-icon';
+                headers['Content-Type'] = 'image/vnd.microsoft.icon';
+                break;
+            case 'odt':
+                headers['Content-Type'] = 'application/vnd.oasis.opendocument.text';
+                break;
+            case 'ods':
+                headers['Content-Type'] = 'application/vnd.oasis.opendocument.spreadsheet';
+                break;
+            case 'odp':
+                headers['Content-Type'] = 'application/vnd.oasis.opendocument.presentation';
+                break;
+            case 'odg':
+                headers['Content-Type'] = 'application/vnd.oasis.opendocument.graphics';
+                break;
+            case 'xls':
+                headers['Content-Type'] = 'application/vnd.ms-excel';
+                break;
+            case 'xlsx':
+                headers['Content-Type'] = 'application/vnd.ms-excel';
+                break;
+            case 'ppt':
+                headers['Content-Type'] = 'application/vnd.ms-powerpoint';
+                break;
+            case 'pptx':
+                headers['Content-Type'] = 'application/vnd.ms-powerpoint';
+                break;
+            case 'doc':
+                headers['Content-Type'] = 'application/msword';
+                break;
+            case 'docx':
+                headers['Content-Type'] = 'application/msword';
+                break;
+            case 'xul':
+                headers['Content-Type'] = 'application/vnd.mozilla.xul+xml';
+                break;
+            case 'wma':
+                headers['Content-Type'] = 'audio/x-ms-wma';
+                break;
+            case 'rn':
+                headers['Content-Type'] = 'audio/vnd.rn-realaudio';
+                break;
+            case 'wav':
+                headers['Content-Type'] = 'audio/x-wav';
                 break;
             default:
                 headers['Content-Type'] = 'text/plain';

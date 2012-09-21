@@ -2,6 +2,11 @@
     "welcome": "Welcome to Yann's NodeJS server!",
     "name": "FirstGameServer",
     "mode": "debug",
+    "bdd":
+    {
+        "acl": "Json",
+        "host": "./acl.js"
+    },
     "errorPath": "Error/",
     "debug": 
     {

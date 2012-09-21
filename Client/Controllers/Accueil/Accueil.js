@@ -16,6 +16,6 @@ module.exports = Accueil = Controller.extend({
     Plop: function()
     {
         var get = this.$_GET;
-        return "<link href=\"/Resources/css/style.css\" rel=\"stylesheet\" type=\"text/css\" /><span id=\"test\">Accueil</span>";
+        return "<audio src=\"/Resources/audio/menu.mp3\"  controls=\"controls\">&lt;audio&gt; non supportée !</audio>";
     }
 });

@@ -4,6 +4,7 @@ var http = require('http');
 var _ = require("underscore");
 var sys = require("sys");
 var url   = require('url');
+var Session   = require('./SessionManagement.js');
 
 module.exports = Server = cls.Class.extend({
     init: function(config)
@@ -47,7 +48,8 @@ module.exports = Server = cls.Class.extend({
         var self = this; 
         var WebRouter = require('./WebRouter');
         var router = new WebRouter(this.configServer);
-        
+        var session = new Session();
+        //TODO finir les sessions
         http.createServer(function (req, res)
         {
             //wrap calls in a try catch
